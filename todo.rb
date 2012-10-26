@@ -636,7 +636,7 @@ def class_plan(name, start, length, s, t, parent = nil)
 end
 
 
-def singleton(name, importance = 0)
+def singleton(name, importance = 4)
   newtodo name, importance
   newwork
 end
