@@ -288,6 +288,11 @@ class Todo < ActiveRecord::Base
         # make it ordered in the big order of density
         sort! { |a,b| b.density_compare(a)}.
         each{ |t|
+=begin
+        puts "<<<<<< adding following >>>>>>>>"
+        t.dump
+        puts "<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>"
+=end
         start = t.start
         map.add(MyTime.new(!start ? current :
                            [start, current].max ),
