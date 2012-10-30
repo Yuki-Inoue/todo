@@ -181,6 +181,7 @@ class Todo < ActiveRecord::Base
   end
 
   def finish(howmuch = 100)
+    self.todos.each { |t| t.finish }
     if self.actual == 0
       self.destroy
     else
