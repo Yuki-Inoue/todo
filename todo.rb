@@ -137,24 +137,12 @@ class Todo < ActiveRecord::Base
     print "#{sprintf("%5.1f",self.actual)}/"
     print "#{sprintf("%5.1f",self.estimate)}/"
     print "#{sprintf("%5.1f",self.planned)}| "
-    if self.finished?
-      print "FIN:: "
-    end
-    if !self.start.nil? && self.start > Time.new
-      print "Not Started:: "
-    end
-    if self.todo_id != nil
-      print "P##{self.todo_id} "
-    end
-    if self.importance != 0
-      print "I#{self.importance.to_s} "
-    end
-    if !self.start.nil? && self.start > Time.now
-      print "S #{self.start.strftime("%Y/%m/%d %X")}:: "
-    end
-    if !self.end.nil?
-      print "F #{self.end.strftime("%Y/%m/%d %X")}:: "
-    end
+    print "FIN:: " if self.finished?
+    print "Not Started:: " if self.start && self.start > Time.new
+    print "P##{self.todo_id} " if self.todo_id != nil
+    print "I#{self.importance.to_s} " if self.importance != 0
+    print "S #{self.start.strftime("%Y/%m/%d %X")}:: " if self.start && self.start > Time.now
+    print "F #{self.end.strftime("%Y/%m/%d %X")}:: " if self.end
     puts self.name
     self.todo_memos.each{ |memo|
       puts (prefix + "                        * #{memo.content}")
@@ -385,6 +373,14 @@ end
 
 class Work < ActiveRecord::Base
   belongs_to :todo
+
+  include Comparable
+
+  def <=>(other)
+    self.end <=> other.end
+  end
+
+
   def Work.ofTodo(plan = nil)
     w = Work.start
     (plan || $t).works << w
