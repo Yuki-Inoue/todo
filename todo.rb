@@ -13,6 +13,7 @@ begin
   ActiveRecord::Migration.create_table :todos do |t|
     t.column :name       , :string, :null => false
     t.column :todo_id    , :int
+    t.column :routine_id , :int
     t.column :planned    , :float, :default => 0
     t.column :finished   , :int, :default => 0
     t.column :start      , :datetime
@@ -52,6 +53,15 @@ begin
 rescue
 end
 
+begin
+  ActiveRecord::Migration.create_table :routines do |t|
+    t.column :kind       , :int
+    t.column :offset     , :int
+  end
+rescue
+end
+
+
 
 $infty = 1.0/0.0
 
@@ -63,6 +73,7 @@ class Todo < ActiveRecord::Base
   has_many :todos
   has_many :todo_memos
   belongs_to :todo
+  belongs_to :routine
 
   has_and_belongs_to_many :ftos_finish, :join_table => "ftos_relations", :class_name => "Todo", :foreign_key => "start_id", :association_foreign_key => "finish_id"
   has_and_belongs_to_many :ftos_start, :join_table => "ftos_relations", :class_name => "Todo", :foreign_key => "finish_id", :association_foreign_key => "start_id"
@@ -143,6 +154,7 @@ class Todo < ActiveRecord::Base
     print "I#{self.importance.to_s} " if self.importance != 0
     print "S #{self.start.strftime("%Y/%m/%d %X")}:: " if self.start && self.start > Time.now
     print "F #{self.end.strftime("%Y/%m/%d %X")}:: " if self.end
+    print "#{self.routine} " if self.routine
     puts self.name
     self.todo_memos.each{ |memo|
       puts (prefix + "                        * #{memo.content}")
@@ -170,13 +182,23 @@ class Todo < ActiveRecord::Base
     self.finished >= 100
   end
 
+  def set_finished_and_save(howmuch)
+    self.finished = howmuch
+    self.save
+  end
+
   def finish(howmuch = 100)
-    self.todos.each { |t| t.finish }
-    if self.actual == 0
-      self.destroy
+    if howmuch >= 100
+      self.todos.each { |t| t.finish howmuch }
+      routine = self.routine
+      routine.generate(t) if routine
+      if self.actual == 0
+        self.destroy
+      else
+        set_finished_and_save howmuch
+      end
     else
-      self.finished = howmuch
-      self.save
+      set_finished_and_save howmuch
     end
   end
 
@@ -465,6 +487,57 @@ class TodoMemo < ActiveRecord::Base
   end
 end
 
+class Routine < ActiveRecord::Base
+  def generate(old_todo)
+    new_todo =
+      Todo.new(:name => old_todo.name,
+               :todo_id => old_todo.todo_id,
+               :routine_id => old_todo.routine_id,
+               :planned => old_todo.planned,
+               :importance => old_todo.importance)
+    offset = self.offset
+    if self.kind == 0 # regular
+      new_todo.start = old_todo.start + offset
+      new_todo.end = old_todo.end + offset
+    else
+      latest_work = old_todo.works.max
+      new_start =
+        (latest_work ? latest_work.end : Time.new) + offset
+      new_todo.start = new_start
+      new_todo.end = new_start + (old_todo.end - old_todo.start)
+    end
+    new_todo.save
+    new_todo
+  end
+
+  def recursive_converter(offset, test_arr)
+    hd, tl = test_arr
+    length, unit_str = hd
+    candidate = offset/length
+    if candidate >= 1
+      sprintf(".1f",candidate) + unit_str
+    else
+      recursive_converter(offset, tl)
+    end
+  end
+
+  def string_of_offset(offset)
+    test_arr =
+      [[$year,"Y"],
+       [[$month,"M"],
+        [[$week,"W"],
+         [[$day,"D"],
+          [[$hour,"h"],
+           [[$minute,"m"],
+            [[1,"s"]]]]]]]]
+    recursive_converter(offset, test_arr)
+  end
+
+  def to_s
+    "R" + self.kind.to_s + "_" + (string_of_offset self.offset)
+  end
+end
+
 
 def newtodo(name, importance = 0, endtime = nil)
   t = Todo.new(:name => name, :importance => importance, :end => endtime)
@@ -652,3 +725,11 @@ $day = 24 * $hour
 $week = 7 * $day
 $month = 30 * $day
 $year = 365 * $day
+
+$everyday =
+Routine.find(:all, :conditions => ["kind = ? and offset = ?",0,$day]).first
+
+unless $everyday
+  $everyday = Routine.new(:kind => 0, :offset => $day)
+  $everyday.save
+end
