@@ -154,13 +154,15 @@ class Todo < ActiveRecord::Base
     self.dump prefix
     newprefix = "    " + prefix
     viewing_children = self.todos
-    if omit_finished
-      viewing_children =
-        viewing_children.
-        find_all{ |t| !t.finished? }
+    if prefix.length == 0
+      if omit_finished
+        viewing_children =
+          viewing_children.
+          find_all{ |t| !t.finished? }
+      end
+      viewing_children.
+        each{ |t| t.focus(newprefix) }
     end
-    viewing_children.
-      each{ |t| t.focus(newprefix) }
     nil
   end
 
