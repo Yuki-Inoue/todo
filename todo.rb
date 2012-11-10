@@ -21,6 +21,7 @@ begin
     t.column :importance , :int
     t.column :learned    , :string
     t.column :hook       , :string
+    t.column :divided    , :boolean
   end
 rescue
 end
@@ -107,6 +108,19 @@ class Todo < ActiveRecord::Base
       other.start <=> self.start
   end
 
+
+  def getFinished
+    unless divided
+      self.finished
+    else
+      work_hours = self.works.inject(0) { |sum,w| sum + w.hours }
+      children_estimate = self.todos.inject(0) { |sum,t| sum + t.estimate }
+      children_actual = self.todos.inject(0) { |sum,t| sum + t.actual }
+      (children_actual + work_hours) / (children_estimate + work_hours) * 100
+    end
+  end
+
+
   # first importance, and then density
   def density_compare(other, time = Time.new)
     r = self.importance <=> other.importance
@@ -123,13 +137,14 @@ class Todo < ActiveRecord::Base
   end
 
   def estimate
-    self.finished == 0 ?
+    self.getFinished == 0 ?
     self.planned :
-      self.actual / (self.finished / 100.0)
+      self.actual / (self.getFinished / 100.0)
   end
 
   def separate_remain
-    self.todos.inject(self.estimate - self.actual){ |remain,t|
+    self.divided ? 0 :
+      self.todos.inject(self.estimate - self.actual){ |remain,t|
       remain - t.separate_remain
     }
   end
@@ -179,10 +194,11 @@ class Todo < ActiveRecord::Base
   end
 
   def finished?
-    self.finished >= 100
+    self.getFinished >= 100
   end
 
   def set_finished_and_save(howmuch)
+    raise "setting finished to divided todo" if self.divided
     self.finished = howmuch
     self.save
   end
