@@ -231,7 +231,6 @@ class Todo < ActiveRecord::Base
   end
 
   def Todo.dump(todos, prefix = "", seedonly = false)
-    week = 24 * 60 * 60 * 7
     current = Time.now
     todos = todos.sort
 
@@ -240,7 +239,7 @@ class Todo < ActiveRecord::Base
 
 
     faraway, rest = rest.
-      partition{ |t| t.start && t.start >= current + week }
+      partition{ |t| t.start && t.start >= current + $week }
 
     in1week, rest = rest.partition { |t| t.start && t.start > current }
     hooked, rest = rest.partition { |t| t.hook }
@@ -283,7 +282,6 @@ class Todo < ActiveRecord::Base
   def Todo.density_dump
     map = PeriodMap.new
     current = Time.new
-    week = 7 * 24 * 60 * 60
     sorted = Todo.
       find(:all, :conditions => ["finished < ?",100]).sort!
     hasdensity, nodensity = sorted.
@@ -292,7 +290,7 @@ class Todo < ActiveRecord::Base
 
 
     nodensity_notstarted, nodensity = nodensity.
-      partition{ |todo| todo.start && todo.start > current + week }
+      partition{ |todo| todo.start && todo.start > current + $week }
 
     Todo.dump(nodensity_notstarted)
 
