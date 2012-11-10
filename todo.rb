@@ -150,7 +150,7 @@ class Todo < ActiveRecord::Base
     print "#{sprintf("%5.1f",self.planned)}| "
     print "FIN:: " if self.finished?
     print "Not Started:: " if self.start && self.start > Time.new
-    print "P##{self.todo_id} " if self.todo_id != nil
+    print "P##{self.todo_id} " if self.todo_id
     print "I#{self.importance.to_s} " if self.importance != 0
     print "S #{self.start.strftime("%Y/%m/%d %X")}:: " if self.start && self.start > Time.now
     print "F #{self.end.strftime("%Y/%m/%d %X")}:: " if self.end
