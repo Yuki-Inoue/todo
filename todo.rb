@@ -142,13 +142,21 @@ class Todo < ActiveRecord::Base
       self.actual / (self.getFinished / 100.0)
   end
 
+  def remain
+    self.estimate - self.actual
+  end
+
+  # on some cases, this value can be less than 0.
+  # see separate_density
   def separate_remain
     self.divided ? 0 :
       self.todos.inject(self.estimate - self.actual){ |remain,t|
-      remain - t.separate_remain
+      remain - t.remain
     }
   end
 
+  # on some cases, where user don't set finished and there begin actual, etc,
+  # the separate_density may be less than 0.
   def separate_density(time = Time.new)
     start = self.start
     endtime = self.end
