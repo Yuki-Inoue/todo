@@ -337,7 +337,7 @@ class Todo < ActiveRecord::Base
       puts "todoid(#{exp.getObj.id}) has overflowed!!"
       raise
     end
-        
+
     map.reverse_each{ |block|
       block.dump_perday
       block.log.each{ |x|
