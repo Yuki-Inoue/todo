@@ -660,6 +660,18 @@ def setstart(time)
   $t
 end
 
+def setwstart(time)
+  $w.start = time
+  $w.save
+  $w
+end
+
+def setwend(time)
+  $w.end = time
+  $w.save
+  $w
+end
+
 def setplanned(i)
   $t.planned = i
   $t.save
