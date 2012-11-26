@@ -17,7 +17,7 @@ TODO_DEFINE_TAG(hook)
 TODO_DEFINE_TAG(todo_id)
 TODO_DEFINE_TAG(routine_id)
 TODO_DEFINE_TAG(divided)
-TODO_DEFINE_TAG(todo)
+TODO_DEFINE_TAG(todos)
 
 typedef SQLRow<
   todo_id_tag, int, SQLRow
@@ -34,7 +34,7 @@ typedef SQLRow<
 	    <todo_divided_tag, bool, NilClass> > > > > > > > > > >
   > todo_row;
 
-typedef SQLTable<todo_todo_tag, todo_row> todo_table;
+typedef SQLTable<todo_todos_tag, todo_row> todo_table;
 typedef SQLRowObject<todo_table> todo;
 
 
@@ -44,19 +44,36 @@ typedef SQLRowObject<todo_table> todo;
 
 int main(){ // for test dump
 
+  using namespace std;
+
   const string home = getenv("HOME");
   const string full_path = home + "/" + "Dropbox/Todo/todo_ruby.sqlite3";
 
   sqlite3 *db;
-  sqlite3_open(full_path.c_str(), &db);
+  if( sqlite3_open(full_path.c_str(), &db) != SQLITE_OK ){
+    cout << "error!" << '\n'
+	 << sqlite3_errmsg(db) << endl;
+    return 1;
+  }
 
   todo_table todos(db);
 
-
   std::deque<todo> v;
-  find_all(todos, std::back_inserter(v));
+  try{
+    find_all(todos, std::back_inserter(v));
+  }
+  catch(const std::string &str){
+    cout << "err:: " << str << endl;
+  }
+  catch(exception &e){
+    cout << e.what() << endl;
+  }
+
+  cout << "found: " << v.size() << endl;
 
   foreach(const todo &t, v){
-    cout << get(t, Type2Type<todo_name_tag>()) << endl;
+    cout << get(t, todo_name_tag()) << ": end:: " << get(t, todo_end_tag()) << endl;
   }
+
+  sqlite3_close(db);
 }
