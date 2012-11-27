@@ -1,4 +1,5 @@
 CXX = c++
 LDFLAGS += -lsqlite3 -lboost_date_time
+INCLUDES += ../cpplib
 
 CXXProgram(todo, todo_meta)
