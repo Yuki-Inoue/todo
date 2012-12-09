@@ -9,6 +9,7 @@ ActiveRecord::Base.establish_connection(
   :timeout => 5000
 )
 
+=begin
 begin
   ActiveRecord::Migration.create_table :todos do |t|
     t.column :name       , :string, :null => false
@@ -61,6 +62,7 @@ begin
   end
 rescue
 end
+=end
 
 
 
