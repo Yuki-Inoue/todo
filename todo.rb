@@ -755,6 +755,11 @@ def singleton(name, importance = 4)
 end
 
 
+def rmmemo(i)
+  $t.todo_memos[i].destroy
+end
+
+
 $minute = 60
 $hour = 60 * $minute
 $day = 24 * $hour
