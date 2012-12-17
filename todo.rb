@@ -169,10 +169,10 @@ class Todo < ActiveRecord::Base
 
   def dump(prefix = "")
     print prefix
-    print "#{sprintf("%3d",self.id)}| "
     print "#{sprintf("%5.1f",self.actual)}/"
     print "#{sprintf("%5.1f",self.estimate)}/"
     print "#{sprintf("%5.1f",self.planned)}| "
+    print "#{sprintf("%3d",self.id)}| "
     print "FIN:: " if self.finished?
     print "Not Started:: " if self.start && self.start > Time.new
     print "P##{self.todo_id} " if self.todo_id
