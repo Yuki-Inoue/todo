@@ -305,11 +305,12 @@ class Todo < ActiveRecord::Base
     nil
   end
 
-  def Todo.density_dump
+  def Todo.density_dump(threshold=0)
     map = PeriodMap.new
     current = Time.new
     sorted = Todo.
-      find(:all, :conditions => ["finished < ?",100]).sort!
+      find(:all, :conditions =>
+           ["finished < ? and importance >= ?",100,threshold]).sort!
     hasdensity, nodensity = sorted.
       # by this find_all, all those finite ranged todos will be selected
       partition{ |todo| todo.separate_density > 0 }
@@ -648,8 +649,8 @@ def wfinish
   $w
 end
 
-def ddump
-  Todo.density_dump
+def ddump(threshold=0)
+  Todo.density_dump threshold
 end
 
 def setend(time)
