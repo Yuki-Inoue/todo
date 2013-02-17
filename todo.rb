@@ -208,7 +208,7 @@ class Todo < ActiveRecord::Base
   def finish(howmuch = 100)
     if howmuch >= 100
       self.todos.each { |t| t.finish howmuch }
-      if self.actual == 0
+      if self.actual == 0 && !self.learned && self.todos.empty?
         self.destroy
       else
         set_finished_and_save howmuch
