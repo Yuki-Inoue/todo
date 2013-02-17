@@ -435,7 +435,7 @@ class Work < ActiveRecord::Base
       ((self.end || Time.new) - self.start) / 3600.0
   end
 
-  def expr
+  def full_format_expr
     "For ##{sprintf("%3d",self.todo_id)}: " +
       (self.start.nil? ? "" :
        "S #{self.start.strftime("%Y/%m/%d %X")} ") +
@@ -461,7 +461,7 @@ class Work < ActiveRecord::Base
     MyTime.new(self.start).printr MyTime.new(self.end)
     print "  "
     print (self.hours == 0 ? "| " : "#{sprintf("%.1f",self.hours)}h | ")
-    print "#{self.id}: #{self.expr}"
+    print "#{self.id}: #{Todo.find(self.todo_id).name}"
     puts (self.memo ? " / #{self.memo}" : "")
   end
 
