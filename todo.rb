@@ -200,7 +200,6 @@ class Todo < ActiveRecord::Base
   end
 
   def set_finished_and_save(howmuch)
-    raise "setting finished to divided todo" if self.divided
     self.finished = howmuch
     self.save
   end
