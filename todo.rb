@@ -334,7 +334,11 @@ class Todo < ActiveRecord::Base
       block.dump_perday
       block.log.each{ |x|
         d,t = x
-        puts "  #{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}" if !t.hook
+        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
+        str = "(" + str + ")" if t.hook || !t.todos.empty?
+        print ("  " + str)
+        print (" => " + t.hook) if t.hook
+        puts ""
       }
       puts
     }
@@ -349,9 +353,6 @@ class Todo < ActiveRecord::Base
 
     puts "wait finish::"
     Todo.dump(wait_finish)
-
-    puts
-    Todo.dump(hasdensity.find_all{ |t| t.hook })
 
     nil
   end
