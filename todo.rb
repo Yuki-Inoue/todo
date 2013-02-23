@@ -108,6 +108,7 @@ class Todo < ActiveRecord::Base
     unless divided
       self.finished
     else
+      return 0.0 if self.todos.any? { |todo| todo.estimate == 0 }
       work_hours = self.works.inject(0) { |sum,w| sum + w.hours }
       children_estimate = self.todos.inject(0) { |sum,t| sum + t.estimate }
       children_actual = self.todos.inject(0) { |sum,t| sum + t.actual }
