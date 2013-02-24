@@ -63,6 +63,27 @@ end
 $infty = 1.0/0.0
 
 
+def nextmonth(time)
+  return nil unless time
+  y = time.year
+  m = time.month
+  d = time.day
+  m += 1
+  if m > 12 then
+    y += 1
+    m = 1
+  end
+  Time.local(y,m,d)
+end
+
+def nextyear(time)
+  return nil unless time
+  y = time.year
+  m = time.month
+  d = time.day
+  Time.local(y+1, m, d)
+end
+
 
 
 class Todo < ActiveRecord::Base
@@ -75,6 +96,36 @@ class Todo < ActiveRecord::Base
   has_and_belongs_to_many :ftos_start, :join_table => "ftos_relations", :class_name => "Todo", :foreign_key => "finish_id", :association_foreign_key => "start_id"
 
   include Comparable
+
+  def repeat
+    return unless self.repeat_type && self.repeat_type > 0
+    # the regular STEP
+    if self.repeat_type == 1
+      newtodo = self.clone
+      newtodo.start = self.start + self.repeat_step
+      newtodo.end = self.end + self.repeat_step
+      newtodo.save
+    # the interval of STEP
+    elsif self.repeat_type == 2
+      newtodo = self.clone
+      newtodo.start = self.end + repeat_step
+      newtodo.end = newtodo.start + (self.end - self.start)
+      newtodo.save
+    # every month
+    elsif self.repeat_type == 3
+      newtodo = self.clone
+      newtodo.start = nextmonth(self.start)
+      newtodo.end = nextmonth(self.end)
+      newtodo.save
+    elsif self.repeat_type == 4
+      newtodo = self.clone
+      newtodo.start = nextyear(self.start)
+      newtodo.end = nextyear(self.end)
+      newtodo.save
+    end
+    newtodo
+  end
+
 
   def time_compare_start(time)
     selfnil = !self.start
@@ -207,12 +258,14 @@ class Todo < ActiveRecord::Base
 
   def finish(howmuch = 100)
     if howmuch >= 100
+      ret = self.repeat
       self.todos.each { |t| t.finish howmuch }
       if self.actual == 0 && !self.learned && self.todos.empty?
         self.destroy
       else
         set_finished_and_save howmuch
       end
+      ret
     else
       set_finished_and_save howmuch
     end
