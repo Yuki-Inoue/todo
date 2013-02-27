@@ -299,6 +299,22 @@ class Todo < ActiveRecord::Base
     end
   end
 
+
+  def Todo.map_dump(map)
+    map.reverse_each{ |block|
+      block.dump_perday
+      block.log.each{ |x|
+        d,t = x
+        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
+        str = "(" + str + ")" if t.hook || !t.todos.empty?
+        print ("  " + str)
+        print (" => " + t.hook) if t.hook
+        puts ""
+      }
+      puts
+    }
+  end
+
   def Todo.dump(todos, prefix = "", seedonly = false)
     current = Time.now
     todos = todos.sort
@@ -381,21 +397,11 @@ class Todo < ActiveRecord::Base
                 t.separate_remain * 3600, t) }
     rescue DensityOverflow => exp
       puts "todoid(#{exp.getObj.id}) has overflowed!!"
+      Todo.map_dump(map)
       raise
     end
 
-    map.reverse_each{ |block|
-      block.dump_perday
-      block.log.each{ |x|
-        d,t = x
-        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
-        str = "(" + str + ")" if t.hook || !t.todos.empty?
-        print ("  " + str)
-        print (" => " + t.hook) if t.hook
-        puts ""
-      }
-      puts
-    }
+    Todo.map_dump(map)
 
     puts
     puts "no densities::"
