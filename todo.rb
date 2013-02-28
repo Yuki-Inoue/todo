@@ -117,6 +117,7 @@ class Todo < ActiveRecord::Base
       newtodo.start = nextmonth(self.start)
       newtodo.end = nextmonth(self.end)
       newtodo.save
+    # every year
     elsif self.repeat_type == 4
       newtodo = self.clone
       newtodo.start = nextyear(self.start)
