@@ -766,3 +766,18 @@ $day = 24 * $hour
 $week = 7 * $day
 $month = 30 * $day
 $year = 365 * $day
+
+
+def addbirthday(name, month, mday)
+  name += " BM"
+  newtodo name, 4
+  current = Time.new
+  candidate = Time.local(current.year, month, mday)
+  candidate = nextyear(candidate) if candidate < current
+  $t.start = candidate
+  $t.end = $t.start + $day
+  $t.planned = 0.1
+  $t.repeat_type = 4
+  $t.save
+  $t
+end
