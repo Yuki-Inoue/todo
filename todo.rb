@@ -121,8 +121,9 @@ class Todo < ActiveRecord::Base
     # the interval of STEP
     elsif self.repeat_type == 2
       newtodo = self.clone
-      newtodo.start = self.end + repeat_step
-      newtodo.end = newtodo.start + (self.end - self.start)
+      newtodo.start = Time.new + self.repeat_step
+      newtodo.end = self.end && self.start &&
+        newtodo.start + (self.end - self.start)
       newtodo.save
     # every month
     elsif self.repeat_type == 3
@@ -719,6 +720,7 @@ def unplanned
 end
 
 def stash(howmuch)
+  setstart ($t.start + howmuch)
   setend ($t.end + howmuch)
 end
 
