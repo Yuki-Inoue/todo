@@ -63,6 +63,14 @@ end
 $infty = 1.0/0.0
 
 
+def nextyear(time)
+  return nil unless time
+  y = time.year
+  m = time.month
+  d = time.day
+  Time.local(y+1, m, d)
+end
+
 def nextmonth(time)
   return nil unless time
   y = time.year
@@ -76,12 +84,17 @@ def nextmonth(time)
   Time.local(y,m,d)
 end
 
-def nextyear(time)
+def nextday(time)
   return nil unless time
   y = time.year
   m = time.month
   d = time.day
-  Time.local(y+1, m, d)
+  d += 1
+  if d > 31 then
+    nextmonth(Time.local(y,m,1))
+  else
+    Time.local(y,m,d)
+  end
 end
 
 
@@ -781,7 +794,7 @@ def addbirthday(name, month, mday)
   candidate = Time.local(current.year, month, mday)
   candidate = nextyear(candidate) if candidate < current
   $t.start = candidate
-  $t.end = $t.start + $day
+  $t.end = nextday($t.start)
   $t.planned = 0.1
   $t.repeat_type = 4
   $t.save
