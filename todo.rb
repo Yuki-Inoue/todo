@@ -306,10 +306,16 @@ class Todo < ActiveRecord::Base
       block.dump_perday
       block.log.each{ |x|
         d,t = x
+        inhibitants = []
         str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
-        str = "(" + str + ")" if t.hook || !t.todos.empty?
+        inhibitants << t.hook if t.hook
+        children = t.todos.map {|child| child.name}
+        inhibitants.concat children
+        finish_todos = t.ftos_finish.map {|fin| fin.name}
+        inhibitants.concat finish_todos
+        str = "(" + str + ")" if !inhibitants.empty?
         print ("  " + str)
-        print (" => " + t.hook) if t.hook
+        print (" => " + inhibitants.join(", ")) if !inhibitants.empty?
         puts ""
       }
       puts
