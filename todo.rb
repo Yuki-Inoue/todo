@@ -323,9 +323,11 @@ class Todo < ActiveRecord::Base
         inhibitants = []
         str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
         inhibitants << t.hook if t.hook
-        children = t.todos.map {|child| child.name}
+        children = t.todos.select {|child| !child.finished? }
+        children = children.map {|child| child.name}
         inhibitants.concat children
-        finish_todos = t.ftos_finish.map {|fin| fin.name}
+        finish_todos = t.ftos_finish.select {|fin| fin.finished? }
+        finish_todos = finish_todos.map {|fin| fin.name}
         inhibitants.concat finish_todos
         str = "(" + str + ")" if !inhibitants.empty?
         print ("  " + str)
