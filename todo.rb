@@ -326,7 +326,7 @@ class Todo < ActiveRecord::Base
         children = t.todos.select {|child| !child.finished? }
         children = children.map {|child| child.name}
         inhibitants.concat children
-        finish_todos = t.ftos_finish.select {|fin| fin.finished? }
+        finish_todos = t.ftos_finish.select {|fin| !fin.finished? }
         finish_todos = finish_todos.map {|fin| fin.name}
         inhibitants.concat finish_todos
         str = "(" + str + ")" if !inhibitants.empty?
