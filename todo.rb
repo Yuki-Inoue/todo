@@ -782,6 +782,12 @@ def rmmemo(i)
   $t.todo_memos[i].destroy
 end
 
+def divide
+  $t.divided = true
+  $t.save
+  $t
+end
+
 
 $minute = 60
 $hour = 60 * $minute
