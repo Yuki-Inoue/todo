@@ -10,11 +10,11 @@
 #define ID 0
 #define NAME 1
 
-class sqlprepare : public std::exception {
+class sqlerror : public std::exception {
     std::string msg_;
 public:
     template <class T>
-    explicit sqlprepare(T &&sql)
+    explicit sqlerror(T &&sql)
     : msg_(static_cast<std::string>("SQL prepare: ") + std::forward<T>(sql)) {}
     const char *what() const noexcept override {
         return msg_.c_str();
@@ -37,14 +37,14 @@ class Todos {
         int ret = sqlite3_prepare_v2
         (db, "SELECT * FROM todos WHERE id = ?", -1, &select_stmt_, nullptr);
         if ( ret != SQLITE_OK)
-            throw sqlprepare("failed to prepare Todos::select");
+            throw sqlerror("failed to prepare Todos::select");
     }
     void prepare_select_all(sqlite3 *db) {
         if (sqlite3_prepare_v2
             (db, "SELECT * FROM todos",
              -1, &select_all_stmt_, nullptr)
             != SQLITE_OK)
-            throw sqlprepare("failed to prepare Todos::select_all");
+            throw sqlerror("failed to prepare Todos::select_all");
     }
 public:
     Todos(){}
@@ -77,10 +77,10 @@ public:
     }
     Todo find(int i) const {
         if ( sqlite3_bind_int(select_stmt_, 1, i) != SQLITE_OK )
-            throw "bind failed";
+            throw sqlerror("bind failed");
         if ( sqlite3_step(select_stmt_) != SQLITE_ROW ){
             sqlite3_reset(select_stmt_);
-            throw "invalid_arg";
+            throw sqlerror("invalid_arg");
         }
         int id = sqlite3_column_int (select_stmt_, ID);
         std::string str = reinterpret_cast<const char *>(sqlite3_column_text(select_stmt_, NAME));
@@ -96,7 +96,7 @@ public:
     GPD (const GPD &) = delete;
     explicit GPD(const std::string &filename) {
         if ( sqlite3_open(filename.c_str(), &db_) != SQLITE_OK)
-            throw sqlprepare("GPD");
+            throw sqlerror("GPD");
         todos.prepare_for_db(db_);
     }
     GPD &operator=(const GPD &) = delete;
