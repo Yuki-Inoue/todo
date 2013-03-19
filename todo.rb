@@ -621,8 +621,8 @@ def tdump
   Todo.dump(Todo.find(:all, :conditions => ["finished < ?",100]))
 end
 
-def wdump
-  Work.dump
+def wdump(lim = 15)
+  Work.dump lim
 end
 
 def memo(str, todo=nil)
