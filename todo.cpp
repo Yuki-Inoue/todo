@@ -9,6 +9,11 @@
 
 #define ID 0
 #define NAME 1
+#define PLANNED 2
+#define FINISHED 3
+#define START 4
+#define END 5
+#define IMPORTANCE 6
 
 class sqlerror : public std::exception {
     std::string msg_;
@@ -24,8 +29,12 @@ public:
 struct Todo {
     int id;
     std::string name;
+    double planned;
+    int finished;
+
     friend std::ostream &operator<<(std::ostream &os, const Todo &todo){
-        os << boost::format("%1$4d : %2%") % todo.id % todo.name << std::endl;
+        os << boost::format("%5.1f/%5.1f|%4d| %s")
+        % todo.finished % todo.planned % todo.id % todo.name << std::endl;
     }
 };
 
@@ -84,8 +93,10 @@ public:
         }
         int id = sqlite3_column_int (select_stmt_, ID);
         std::string str = reinterpret_cast<const char *>(sqlite3_column_text(select_stmt_, NAME));
+        double planned = sqlite3_column_double(select_stmt_, PLANNED);
+        int finished = sqlite3_column_int(select_stmt_, FINISHED);
         sqlite3_reset(select_stmt_);
-        return Todo { id, str };
+        return Todo { id, str, planned, finished };
     }
 };
 
@@ -130,7 +141,7 @@ public:
 
 int main(int argc, char **argv){
     if (argc < 2) {
-        std::cout << boost::format("usage: %1% <gpd.sqlite3>") % argv[0] << std::endl;
+        std::cout << boost::format("usage: %1$s <gpd.sqlite3>") % argv[0] << std::endl;
         return 0;
     }
 
