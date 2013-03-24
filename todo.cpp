@@ -15,15 +15,11 @@
 #define END 5
 #define IMPORTANCE 6
 
-class sqlerror : public std::exception {
-    std::string msg_;
+class sqlerror : public std::runtime_error {
 public:
     template <class T>
     explicit sqlerror(T &&sql)
-    : msg_(static_cast<std::string>("SQL prepare: ") + std::forward<T>(sql)) {}
-    const char *what() const noexcept override {
-        return msg_.c_str();
-    }
+    : runtime_error(static_cast<std::string>("SQL: ") + std::forward<T>(sql)) {}
 };
 
 struct Todo {
