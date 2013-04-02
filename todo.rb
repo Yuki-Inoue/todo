@@ -227,6 +227,11 @@ class Todo < ActiveRecord::Base
       self.separate_remain / length
   end
 
+  def full_name
+    parent = self.todo
+    (parent ? parent.full_name+":" : "") + self.name
+  end
+
   def dump(prefix = "")
     print prefix
     print "#{sprintf("%5.1f",self.actual)}/"
@@ -239,7 +244,7 @@ class Todo < ActiveRecord::Base
     print "I#{self.importance.to_s} " if self.importance != 0
     print "S #{self.start.strftime("%Y/%m/%d %X")}:: " if self.start && self.start > Time.now
     print "F #{self.end.strftime("%Y/%m/%d %X")}:: " if self.end
-    puts self.name
+    puts self.full_name
     self.todo_memos.each{ |memo|
       puts (prefix + "                        * #{memo.content}")
     }
@@ -321,7 +326,7 @@ class Todo < ActiveRecord::Base
       block.log.each{ |x|
         d,t = x
         inhibitants = []
-        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.name}"
+        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.full_name}"
         inhibitants << t.hook if t.hook
         children = t.todos.select {|child| !child.finished? }
         children = children.map {|child| child.name}
