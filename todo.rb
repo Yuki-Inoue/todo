@@ -726,6 +726,11 @@ def stash(howmuch)
   setend ($t.end + howmuch)
 end
 
+def stash_start(howmuch)
+  setstart ($t.start + howmuch)
+end
+
+
 def learned
   Todo.learned
 end
