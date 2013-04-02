@@ -337,6 +337,9 @@ class Todo < ActiveRecord::Base
         print ("  " + str)
         print (" => " + inhibitants.join(", ")) if !inhibitants.empty?
         puts ""
+        t.todo_memos.each { |memo|
+          puts ("              * " + memo.content)
+        }
       }
       puts
     }
