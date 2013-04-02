@@ -727,12 +727,12 @@ def unplanned
 end
 
 def stash(howmuch)
-  setstart ($t.start + howmuch)
+  stash_start howmuch
   setend ($t.end + howmuch)
 end
 
 def stash_start(howmuch)
-  setstart ($t.start + howmuch)
+  setstart (($t.start || Time.new) + howmuch)
 end
 
 
