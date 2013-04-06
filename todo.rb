@@ -318,24 +318,40 @@ class Todo < ActiveRecord::Base
     end
   end
 
+  def inhibitors
+    direct_inhibitor = self.todos.select {|child| !child.finished? }
+    direct_inhibitor.
+      concat(self.ftos_finish.select {|fin| !fin.finished? })
+    ret = []
+    direct_inhibitor.each {|todo|
+      leaves = todo.inhibitors
+      if leaves.empty?
+        ret << todo
+      else
+        ret.concat leaves
+      end
+    }
+    ret
+  end
 
   def Todo.map_dump(map)
     map.reverse_each{ |block|
       block.dump_perday
       block.log.each{ |x|
         d,t = x
-        inhibitants = []
         str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.full_name}"
-        inhibitants << t.hook if t.hook
-        children = t.todos.select {|child| !child.finished? }
-        children = children.map {|child| child.name}
-        inhibitants.concat children
-        finish_todos = t.ftos_finish.select {|fin| !fin.finished? }
-        finish_todos = finish_todos.map {|fin| fin.name}
-        inhibitants.concat finish_todos
-        str = "(" + str + ")" if !inhibitants.empty?
+        leaves = t.inhibitors
+        block_str = leaves.map {|todo| todo.name }
+        if block_str.empty?
+          if t.hook
+            block_str << t.hook
+          else
+            block_str = nil
+          end
+        end
+        str = "(" + str + ")" if block_str
         print ("  " + str)
-        print (" => " + inhibitants.join(", ")) if !inhibitants.empty?
+        print (" => " + block_str.join(", ")) if block_str
         puts ""
         t.todo_memos.each { |memo|
           puts ("              * " + memo.content)
