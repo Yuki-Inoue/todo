@@ -551,7 +551,7 @@ class Work < ActiveRecord::Base
     MyTime.new(self.start).printr MyTime.new(self.end)
     print "  "
     print (self.hours == 0 ? "| " : "#{sprintf("%.1f",self.hours)}h | ")
-    print "#{self.id}: #{Todo.find(self.todo_id).name}"
+    print "#{self.id}: #{Todo.find(self.todo_id).full_name}"
     puts (self.memo ? " / #{self.memo}" : "")
   end
 
