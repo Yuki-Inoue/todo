@@ -128,14 +128,26 @@ class Todo < ActiveRecord::Base
     # every month
     elsif self.repeat_type == 3
       newtodo = self.clone
-      newtodo.start = nextmonth(self.start)
-      newtodo.end = nextmonth(self.end)
+      newstart = self.start
+      newend = self.end
+      for i in 0...(self.repeat_step)
+        newstart = nextmonth(newstart)
+        newend = nextmonth(newend)
+      end
+      newtodo.start = newstart
+      newtodo.end = newend
       newtodo.save
     # every year
     elsif self.repeat_type == 4
       newtodo = self.clone
-      newtodo.start = nextyear(self.start)
-      newtodo.end = nextyear(self.end)
+      newstart = self.start
+      newend = self.end
+      for i in 0...(self.repeat_step)
+        newstart = nextyear(newstart)
+        newend = nextyear(newend)
+      end
+      newtodo.start = newstart
+      newtodo.end = newend
       newtodo.save
     end
     newtodo
