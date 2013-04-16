@@ -249,7 +249,7 @@ class Todo < ActiveRecord::Base
     print "#{sprintf("%5.1f",self.actual)}/"
     print "#{sprintf("%5.1f",self.estimate)}/"
     print "#{sprintf("%5.1f",self.planned)}| "
-    print "#{sprintf("%3d",self.id)}| "
+    print "#{sprintf("%4d",self.id)}| "
     print "FIN:: " if self.finished?
     print "Not Started:: " if self.start && self.start > Time.new
     print "I#{self.importance.to_s} " if self.importance != 0
@@ -351,7 +351,7 @@ class Todo < ActiveRecord::Base
       block.dump_perday
       block.log.each{ |x|
         d,t = x
-        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%3d",t.id)}| I#{t.importance} #{t.full_name}"
+        str = "#{sprintf("%5.2f",d*24)}: #{sprintf("%4d",t.id)}| I#{t.importance} #{t.full_name}"
         leaves = t.inhibitors
         block_str = leaves.map {|todo| todo.name }
         if block_str.empty?
