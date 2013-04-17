@@ -257,7 +257,7 @@ class Todo < ActiveRecord::Base
     print "F #{self.end.strftime("%Y/%m/%d %X")}:: " if self.end
     puts self.full_name
     self.todo_memos.each{ |memo|
-      puts (prefix + "                        * #{memo.content}")
+      puts (prefix + "                         * #{memo.content}")
     }
     nil
   end
